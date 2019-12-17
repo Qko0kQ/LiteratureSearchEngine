@@ -1,0 +1,145 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+    <head> 
+        <title>Search Engine for Research Papers</title>
+        <meta charset="utf-8">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <script>
+            var page_count
+            var ip_address
+            var URL="/"
+            var area
+            var preIndex = 0
+            function relevant(relevance, paperId)
+            {
+                $('input[name="'+paperId+'"]').attr('disabled', 'disabled');
+                $.ajax({ type: 'POST', url: URL + "relevance/", //add endpoint API
+                data: JSON.stringify({query: query, relevance: relevance, id: paperId, ip_address: ip_address}),
+                });
+            }
+
+            function search()
+            {
+                $.ajax({ type: "POST", url: URL + "search/",
+                data: JSON.stringify({query: query, page_count: page_count}),
+                contentType: "applicaton/json; charset=utf-8",
+                success: function(results){
+                    var resultLength = results.length
+                    for (var i=0; i < resultLength; ++i)
+                    {
+                        var paperId = results[i].id
+                        $(".searchResults").append("<hr>");
+                        $(".searchResults").append("<table>");
+                        $(".searchResults").append("<tr><td style='text-align: left;'>");
+                        $(".searchResults").append("<p style=\"font-size:18px; text-align:left\">" + "<a target=\"_blank\" href=\"" + results[i].url + "\">"+results[i].title+"</a>" + "</p>");
+                        $(".searchResults").append("</td></tr>");
+                        $(".searchResults").append("<tr><td>");
+
+                        $(".searchResults").append("</td</tr>");
+                        $(".searchResults").append("<pre style=\"white-space: pre-wrap; text-align:left\">"+results[i].abstract+"</pre>")
+                        $(".searchResults").append("</td</tr>");
+                        $(".searchResults").append("<tr><td style='text-align: left;'>");
+                        $(".searchResults").append("<p style=\"color: #0040ff; font-size:18px; text-align:left\">" + "Related Papers Recommendation:" + "</p>");
+                        $(".searchResults").append("</td></tr>");
+                        $(".searchResults").append("</td</tr>");
+                        $(".searchResults").append("<pre style=\"font-size:14px; white-space: pre-wrap; text-align:left\">"+results[i].recommendations+"</pre>")
+                        $(".searchResults").append("</td</tr>");
+                        $(".searchResults").append("</table>");
+
+                        $(".searchResults").append("<p style=\" text-align:left;\"><input type=\"checkbox\" style=\"\" name=\""+paperId+"\" onclick=\"relevant(true, name)\"> &nbsp<label style='color: #279c34;'> Relevant</label></p>")
+                        $(".searchResults").append("<p style=\"text-align:left;\"><input type=\"checkbox\" name=\""+paperId+"\" onclick=\"relevant(false, name)\">&nbsp<label style='color: #a32208;'> NOT Relevant</label></p>")
+                    }
+
+                        if(resultLength == 0)
+                        {
+                            $(".searchResults").append("<br>");
+                            $(".searchResults").append("<p style=\"font-size:18px; color:Red\"> There are no (more) results to show for the given query </p >");
+                        }
+
+                        if (resultLength < 10)
+                            $("#more").hide();
+
+                        else
+                            $("#more").show();
+                    }
+                });
+
+                function callback(response)
+                {
+                    console.log(response);
+                }
+            }
+
+            function select(index) 
+            {
+                if (index != 0) {
+                    area = document.getElementsByClassName("dropdown-item")[index].innerText;
+                } else {
+                    area = ""
+                }
+                document.getElementsByClassName("dropdown-item")[preIndex].style.color = "black";
+                document.getElementsByClassName("dropdown-item")[index].style.color = "#87CEFA";
+                preIndex = index;
+            }
+
+            $(document).ready(function()
+            {
+                $("#searchButton").click(function()
+                {
+                    $(".searchResults").empty()
+                    page_count = 1
+                    query = document.getElementById("querytext").value + " " + area
+                    search();
+                });
+
+                $("#more").click(function()
+                {
+                    page_count++
+                    query = document.getElementById("querytext").value;
+                    search();
+                });
+
+                $.getJSON('https://api.ipify.org?format=json', function(data){
+                    ip_address = data.ip;
+                });
+            });
+        </script>
+    </head>
+
+    <body>
+        <div class="jumbotron text-center">
+            <h2>ACL Literature Search Engine</h2>
+            <input id="querytext" type="text" placeholder="Search.." size=80/>
+            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Area
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <button class="dropdown-item" type="button" onclick="select(0)">All</button>
+                <button class="dropdown-item" type="button" onclick="select(1)">discourse analysis</button>
+                <button class="dropdown-item" type="button" onclick="select(2)">linguistic model</button>
+                <button class="dropdown-item" type="button" onclick="select(3)">machine translation</button>
+                <button class="dropdown-item" type="button" onclick="select(4)">speech recognition</button>
+                <button class="dropdown-item" type="button" onclick="select(5)">sentiment analysis</button>
+                <button class="dropdown-item" type="button" onclick="select(6)">information extraction</button>
+                <button class="dropdown-item" type="button" onclick="select(7)">linguistic theory</button>
+                <button class="dropdown-item" type="button" onclick="select(8)">sentence semantic</button>
+                <button class="dropdown-item" type="button" onclick="select(9)">word segmentation</button>
+                <button class="dropdown-item" type="button" onclick="select(10)">information system</button>
+                <button class="dropdown-item" type="button" onclick="select(11)">document analysis</button>
+                <button class="dropdown-item" type="button" onclick="select(12)">structure parsing</button>
+                <button class="dropdown-item" type="button" onclick="select(13)">neural language generation</button>
+                <button class="dropdown-item" type="button" onclick="select(14)">metonymy resolution</button>
+            </div>
+            <button type="button" id="searchButton" style="background:#87CEFA; cursor:pointer">
+                Search
+            </button>
+            <div class="searchResults"> </div>
+            <br><br>
+            <button type="button" id="more" style="display:none;"><b>next>>></b></button>
+        </div>
+    </body> 
+</html>
