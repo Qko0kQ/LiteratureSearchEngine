@@ -1,1 +1,0 @@
-from SearchEngine import app as application
