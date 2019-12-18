@@ -1,12 +1,11 @@
-import os, os.path
-from whoosh.index import create_in
 from whoosh.fields import *
+from whoosh.index import create_in
 import xml.dom.minidom as dom
-
+import os, os.path
 
 class GetIndex:
     def __init__(self):
-        self.schema = Schema(paper=ID(stored=True), abstract=TEXT(stored=True), title=TEXT(stored=True), introduction=TEXT(stored=True))
+        self.schema = Schema(paper=ID(stored=True), abstract=TEXT(stored=True), title=TEXT(stored=True), intro=TEXT(stored=True))
         self.ix = create_in("index/", self.schema)
         self.path = "papers_to_index/"
     
@@ -27,23 +26,23 @@ class GetIndex:
                 xmltree = dom.parseString(line)
                 if (xmltree.getElementsByTagName('abstract')):
                     if xmltree.getElementsByTagName('abstract')[0].firstChild is None:
-                        abstractField = ""
+                        abstractContent = ""
                     else:
-                        abstractField = xmltree.getElementsByTagName('abstract')[0].firstChild.nodeValue
+                        abstractContent = xmltree.getElementsByTagName('abstract')[0].firstChild.nodeValue
                 
                 elif (xmltree.getElementsByTagName('title')):
                     if xmltree.getElementsByTagName('title')[0].firstChild is None:
-                        titleField = ""
+                        titleContent = ""
                     else:
-                        titleField = xmltree.getElementsByTagName('title')[0].firstChild.nodeValue
+                        titleContent = xmltree.getElementsByTagName('title')[0].firstChild.nodeValue
 
                 elif (xmltree.getElementsByTagName('introduction')):
                     if (xmltree.getElementsByTagName('introduction')[0].firstChild is None):  
-                        introductionField = ""
+                        introContent = ""
                     else:
-                        introductionField = xmltree.getElementsByTagName('introduction')[0].firstChild.nodeValue
+                        introContent = xmltree.getElementsByTagName('introduction')[0].firstChild.nodeValue
                 
-            writer.add_document(paper = paperId, abstract = abstractField, title = titleField, introduction = introductionField)
+            writer.add_document(paper = paperId, abstract = abstractContent, title = titleContent, intro = introContent)
 
         writer.commit()
         # writer.close()
