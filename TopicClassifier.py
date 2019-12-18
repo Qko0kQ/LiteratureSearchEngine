@@ -39,6 +39,7 @@ from nltk.stem.wordnet import WordNetLemmatizer
 def get_lemma2(word):
 	return WordNetLemmatizer().lemmatize(word)
 
+nltk.download('stopwords')
 en_stop = set(nltk.corpus.stopwords.words('english'))
 
 def prepare_text_for_lda(text):
